@@ -271,32 +271,85 @@ accordingly:
   Base/Arb/Poly/ETH     destination chain
   --------------------- -------------------------------------------------
 
-**2.6 LOOP Token: Canonical Chain Model**
+## 2.6 LOOP Token — Canonical Accounting Model
 
-LOOP is canonical on BSC. This is a non-negotiable architectural
-decision. LOOP\'s floor price is tied to a non-decreasing invariant
-backed by real vault surplus. Replicating native LOOP across five chains
-would create five independent accounting systems that must stay
-synchronized --- a coordination problem that breaks under stress and
-creates attack surface.
+LOOP exists exclusively on BNB Chain (BSC).  
+It is minted, tracked, and redeemed only on BSC.  
+There is no wrapped LOOP, no cross-chain representation, and no secondary supply on any spoke chain.
 
-Users on other chains who hold LOOP receive wLOOP (wrapped LOOP): a 1:1
-bridge-backed representation redeemable on BSC at any time. The user
-interface displays a unified \'LOOP balance\' regardless of chain ---
-the wrapping is invisible to the end user.
+This is a deliberate architectural decision.
 
-+-----------------------------------------------------------------------+
-| **■ LOOP minted: BSC only --- always**                                |
-|                                                                       |
-| **■ LOOP redeemed: BSC only --- always**                              |
-|                                                                       |
-| **■ Floor price tracked: BSC only --- single source of truth**        |
-|                                                                       |
-| **■ wLOOP on other chains: bridge-backed 1:1 IOU, redeemable on BSC** |
-|                                                                       |
-| **■ Invariant integrity: preserved --- no multi-chain floor desync    |
-| risk**                                                                |
-+-----------------------------------------------------------------------+
+LOOP is not designed as a transferable speculative asset.  
+It is a non-transferable, epoch-isolated redemption certificate representing realized, closed profit within the BSC Hub Vault.
+
+Because LOOP is an accounting liability instrument tied to strict invariant enforcement, maintaining a single canonical chain is mandatory for safety.
+
+Multi-chain replication would introduce:
+
+- Independent accounting states
+- Cross-chain floor desynchronization risk
+- Bridge escrow complexity
+- Expanded audit surface
+- Additional attack vectors
+- Governance ambiguity
+
+YieldLoop avoids these risks by enforcing a single source of truth.
+
+### Canonical Rules
+
+- LOOP is minted on BSC only.
+- LOOP is redeemed on BSC only.
+- Redemption_price_E is calculated and enforced on BSC only.
+- Coverage_ratio_E is calculated and enforced on BSC only.
+- LOOP is non-transferable.
+- LOOP cannot exist on any chain other than BSC.
+
+### Multi-Chain User Flow (Without Wrapped LOOP)
+
+Users may deposit from Base, Arbitrum, Polygon, or Ethereum via SpokeGateway contracts.
+
+Funds bridge to BSC where vault accounting and execution occur.
+
+At cycle close:
+
+- If the user selects USDT rewards → USDT may be bridged back to the user's selected chain.
+- If the user selects LOOP rewards → LOOP remains on BSC.
+
+If a user wishes to redeem LOOP:
+
+1. Redemption occurs on BSC.
+2. USDT is released from the Redemption_pool_E.
+3. If desired, USDT may then be bridged to another supported chain.
+
+This preserves invariant integrity while maintaining cross-chain accessibility.
+
+### Why No Wrapped LOOP
+
+YieldLoop does not implement wrapped LOOP (wLOOP).
+
+Because LOOP is:
+
+- Non-transferable
+- Non-speculative
+- Not intended for external DeFi composability
+- Strictly tied to BSC epoch accounting
+
+There is no functional advantage to representing LOOP on other chains.
+
+Removing wrapped representations:
+
+- Reduces bridge risk
+- Reduces audit complexity
+- Simplifies user understanding
+- Strengthens invariant enforcement
+- Improves BSC grant positioning
+
+YieldLoop prioritizes accounting discipline over token portability.
+
+Single-chain liability.
+Multi-chain access.
+
+---
 
 **2.7 Bridge Risk & Operational Cost Classification**
 
